@@ -208,9 +208,6 @@ class TelegramBot(object):
         self.send_photo(update.message.chat.id, image_content, 
                         reply_to_message_id=update.message.id,
                         caption=image_url,
-#                        caption=caption or '/{command} {search_terms}'.format(
-#                            command=update.command, 
-#                            search_terms=' '.join(search_terms)),
         )
 
 
