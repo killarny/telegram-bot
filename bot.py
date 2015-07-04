@@ -136,6 +136,7 @@ class Update(object):
 class TelegramBot(object):
     base_url = 'https://api.telegram.org/bot{bot_id}'
     bot_id = None
+    complain_about_invalid_commands = False
     command_not_supported_message = "That's not a valid command."
     
     def __init__(self):
@@ -234,6 +235,8 @@ def main(bot_class=TelegramBot):
             try:
                 update.handle(bot_class)
             except CommandNotSupported:
+                if not bot.complain_about_invalid_commands:
+                    continue
                 bot.send_message(update.message.chat.id, 
                                  bot.command_not_supported_message.format(
                                     command=update.command))
