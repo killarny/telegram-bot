@@ -188,8 +188,8 @@ class TelegramBot(object):
             'imgsz': 'medium',
             'imgtype': 'photo',
             'as_filetype': 'png',
-            'start': randrange(1, 10),
-            'num': 1000,
+            'start': 0,
+            'num': 10,
             'safe': 'off',
         }).json()
         image_url = None
