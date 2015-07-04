@@ -222,7 +222,7 @@ def main(bot_class=TelegramBot):
             'offset': last_update+1,
         })
         if not response.status_code == 200:
-            raise ValueError('Bad status code: {}'.format(response.status_code))
+            print('Bad status code: {}'.format(response.status_code))
         if not response.json().get('ok'):
             raise ValueError('Error: {error}'.format(
                 error=response.json().get('description', 
