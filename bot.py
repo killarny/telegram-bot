@@ -171,7 +171,7 @@ class Update(object):
             print(e.traceback)
             bot.send_message(self.message.chat.id, 
                              'There was an error with the /{command} '
-                             'command. Sorry!'.format(command=self.command)))
+                             'command. Sorry!'.format(command=self.command))
 
 
 class TelegramBot(object):
