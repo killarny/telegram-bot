@@ -3,6 +3,8 @@ from random import choice, randrange
 import tempfile
 from time import sleep
 import traceback
+from bs4 import BeautifulSoup
+import praw
 import requests
 
 
