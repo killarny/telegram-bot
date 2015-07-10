@@ -24,7 +24,7 @@ def get_image_links_from_imgur(imgur_url):
     if 'imgur.com' not in imgur_url:
         raise ValueError('given URL does not appear to be an imgur URL')
     urls = []
-    response = requests.get(imgur_url)
+    response = requests.get(imgur_url).json()
     if response.get('responseStatus') != 200:
         raise ValueError('there was something wrong with the given URL')
     soup = BeautifulSoup(response.text)
@@ -242,7 +242,7 @@ class TelegramBot(object):
         image_url = choice(get_image_links_from_imgur(submission))
         # get the image content
         response = requests.get(image_url)
-        if response.get('responseStatus') != 200:
+        if response.json().get('responseStatus') != 200:
             self.send_message(update.message.chat.id,
                               'I can\'t find a suitable eyebleach image. '
                               'Try again later!',
