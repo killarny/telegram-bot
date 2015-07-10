@@ -27,7 +27,7 @@ def get_image_links_from_imgur(imgur_url):
     response = requests.get(imgur_url)
     if response.status_code != 200:
         raise ValueError('there was something wrong with the given URL')
-    soup = BeautifulSoup(response.text)
+    soup = BeautifulSoup(response.text, 'html5lib')
     # this is an album
     if '/a/' in imgur_url:
         matches = soup.select('.album-view-image-link a')
