@@ -223,6 +223,7 @@ def main(bot_class=TelegramBot):
         })
         if not response.status_code == 200:
             print('Bad status code: {}'.format(response.status_code))
+            continue
         if not response.json().get('ok'):
             raise ValueError('Error: {error}'.format(
                 error=response.json().get('description', 
