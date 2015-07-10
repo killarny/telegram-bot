@@ -249,7 +249,7 @@ class TelegramBot(object):
             )
             return
         image_content = response.content
-        self.send_photo(udpate.message.chat.id, image_content,
+        self.send_photo(update.message.chat.id, image_content,
                         reply_to_message_id=update.message.id,
                         caption=image_url)
 
