@@ -202,7 +202,8 @@ class TelegramBot(object):
             else:
                 image_url = result.get('unescapedUrl')
         if not image_url:
-            self.send_message('I can\'t find an image '
+            self.send_message(update.message.chat.id,
+                              'I can\'t find an image '
                               'for "{}"'.format(' '.join(search_terms)))
             return
         image_content = requests.get(image_url).content
