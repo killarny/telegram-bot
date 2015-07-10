@@ -5,6 +5,39 @@ from time import sleep
 import requests
 
 
+reddit_user_agent = ('{platform}:{app_id}:{version} '
+                     '(by /u/{reddit_username})').format(
+                        platform='python',
+                        app_id='telegram-bot',
+                        version='1',
+                        reddit_username='killarny',
+                     )
+
+
+def get_image_links_from_imgur(imgur_url):
+    """
+    Given an imgur URL, return a list of image URLs from it.
+    """
+    if 'imgur.com' not in imgur_url:
+        raise ValueError('given URL does not appear to be an imgur URL')
+    urls = []
+    response = requests.get(imgur_url)
+    if response.get('responseStatus') != 200:
+        raise ValueError('there was something wrong with the given URL')
+    soup = BeautifulSoup(response.text)
+    # this is an album
+    if '/a/' in imgur_url:
+        matches = soup.select('.album-view-image-link a')
+        urls += [x['href'] for x in matches]
+    # directly linked image
+    elif 'i.imgur.com' in imgur_url:
+        urls.append(imgur_url)
+    # single-image page
+    else:
+        urls.append(soup.select('.image a')[0]['href'])
+    return urls
+
+    
 class User(object):
     id = 0
     username = None
@@ -177,6 +210,38 @@ class TelegramBot(object):
         response = requests.post('{}/sendphoto'.format(self.url), 
                                  params=params, files=files)
         
+    def command_eyebleach(self, caption=None, update=None,
+                           subreddits=['stacked']):
+        """
+        Find and send a random image from a random subreddit containing 
+        "eyebleach" images.
+        """
+        if not update:
+            return
+        self.send_chat_action(update.message.chat.id)
+        # choose a random subreddit to pull image from
+        subreddit = choice(subreddits)
+        # grab submissions from the subreddit
+        reddit = praw.Reddit(user_agent=reddit_user_agent)
+        submissions = reddit.get_subreddit(subreddit).get_hot(limit=25)
+        # skip non-imgur links, and choose a random submission
+        submission = choice([sub.url for sub in submissions 
+                             if 'imgur.com' in sub.url])
+        # find all the image links in the submission, and choose a random one
+        image_url = choice(get_image_links_from_imgur(submission))
+        # get the image content
+        response = requests.get(image_url)
+        if response.get('responseStatus') != 200:
+            self.send_message(update.message.chat.id,
+                              'I can\'t find a suitable eyebleach image. '
+                              'Try again later!',
+            )
+            return
+        image_content = response.content
+        self.send_photo(udpate.message.chat.id, image_content,
+                        reply_to_message_id=update.message.id,
+                        caption=image_url)
+
     def command_get(self, *search_terms, caption=None, update=None):
         if not search_terms or not update:
             return
