@@ -161,9 +161,17 @@ class Update(object):
         if not func:
             raise CommandNotSupported(self.command)
         
-        if self.command_args:
-            return func(*self.command_args, update=self)
-        return func(update=self)
+        try:
+            if self.command_args:
+                return func(*self.command_args, update=self)
+            return func(update=self)
+        except Exception as e:
+            # print traceback for exceptions, but don't allow them to 
+            #  halt the bot
+            print(e.traceback)
+            bot.send_message(self.message.chat.id, 
+                             'There was an error with the /{command} '
+                             'command. Sorry!'.format(command=self.command)))
 
 
 class TelegramBot(object):
