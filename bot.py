@@ -2,6 +2,7 @@ from datetime import datetime
 from random import choice, randrange
 import tempfile
 from time import sleep
+import traceback
 import requests
 
 
@@ -168,7 +169,7 @@ class Update(object):
         except Exception as e:
             # print traceback for exceptions, but don't allow them to 
             #  halt the bot
-            print(e.traceback)
+            print(traceback.format_exc())
             bot.send_message(self.message.chat.id, 
                              'There was an error with the /{command} '
                              'command. Sorry!'.format(command=self.command))
