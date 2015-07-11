@@ -234,7 +234,7 @@ class TelegramBot(object):
         subreddit = choice(subreddits)
         # grab submissions from the subreddit
         reddit = praw.Reddit(user_agent=reddit_user_agent)
-        submissions = reddit.get_subreddit(subreddit).get_hot(limit=25)
+        submissions = reddit.get_subreddit(subreddit).get_hot(limit=50)
         # skip non-imgur links, animated images, and choose a random submission
         submission = choice([sub.url for sub in submissions 
                              if 'imgur.com' in sub.url])
