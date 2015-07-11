@@ -222,7 +222,7 @@ class TelegramBot(object):
                                  params=params, files=files)
         
     def command_eyebleach(self, caption=None, update=None,
-                           subreddits=['stacked']):
+                           subreddits=['stacked', 'tightdresses']):
         """
         Find and send a random image from a random subreddit containing 
         "eyebleach" images.
@@ -235,7 +235,7 @@ class TelegramBot(object):
         # grab submissions from the subreddit
         reddit = praw.Reddit(user_agent=reddit_user_agent)
         submissions = reddit.get_subreddit(subreddit).get_hot(limit=25)
-        # skip non-imgur links, and choose a random submission
+        # skip non-imgur links, animated images, and choose a random submission
         submission = choice([sub.url for sub in submissions 
                              if 'imgur.com' in sub.url])
         # find all the image links in the submission, and choose a random one
