@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from datetime import datetime
 import logging
 from time import sleep
@@ -189,6 +190,9 @@ class TelegramBot(object):
 
 
 def main(bot_class=TelegramBot):
+    parser = ArgumentParser(description='An easily extensible Telegram bot.')
+    args = parser.parse_args()
+
     # set up logging aparatus
     logging.captureWarnings(True)
     logging_config = dict(
