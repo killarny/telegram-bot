@@ -182,7 +182,7 @@ class TelegramBot(object):
     bot_id = None
     complain_about_invalid_commands = False
     command_not_supported_message = "That's not a valid command."
-    
+
     def __init__(self):
         if not self.bot_id:
             raise RuntimeError('No bot_id supplied.')
@@ -192,22 +192,22 @@ class TelegramBot(object):
         return self.base_url.format(bot_id=self.bot_id)
 
     def send_chat_action(self, to_id, action=None):
-        if action not in ['typing', 'upload_photo', 'record_video', 
-                          'upload_video', 'record_audio', 'upload_audio', 
+        if action not in ['typing', 'upload_photo', 'record_video',
+                          'upload_video', 'record_audio', 'upload_audio',
                           'upload_document', 'find_location']:
             action = 'typing'
         requests.post('{}/sendchataction'.format(self.url), {
             'chat_id': to_id,
             'action': action,
         })
-        
+
     def send_message(self, to_id, text):
         requests.post('{}/sendmessage'.format(self.url), {
             'chat_id': to_id,
             'text': text,
         })
-        
-    def send_photo(self, to_id, photo_data, reply_to_message_id=None, 
+
+    def send_photo(self, to_id, photo_data, reply_to_message_id=None,
                    caption=None):
         files = {'photo': ('image.png', photo_data)}
         params = {
