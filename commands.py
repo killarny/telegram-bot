@@ -25,6 +25,10 @@ def get_image_links_from_imgur(imgur_url):
     # single-image page
     else:
         urls.append(soup.select('.image a')[0]['href'])
+    # clean up image URLs
+    urls = [url.strip('/') for url in urls]
+    urls = ['http://{}'.format(url) if not url.startswith('http') else url
+            for url in urls]
     return urls
 
 
