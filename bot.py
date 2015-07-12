@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
 from datetime import datetime
 import logging
+from signal import SIGINT, signal
+from signal import SIGTERM
 from time import sleep
 import traceback
 import requests
@@ -192,6 +194,15 @@ class TelegramBot(object):
 def main(bot_class=TelegramBot):
     parser = ArgumentParser(description='An easily extensible Telegram bot.')
     args = parser.parse_args()
+
+    def was_force_stopped(signo, stackframe):
+        if signo == SIGINT:
+            logger.warning('Bot interrupted via keypress!')
+        if signo == SIGTERM:
+            logger.warning('Bot was asked to shutdown..')
+        parser.exit()
+    signal(SIGINT, was_force_stopped)
+    signal(SIGTERM, was_force_stopped)
 
     # set up logging aparatus
     logging.captureWarnings(True)
