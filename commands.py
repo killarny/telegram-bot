@@ -46,7 +46,7 @@ class RedditCommand(object):
     reddit_user_agent = ('{platform}:{app_id}:{version} '
                          '(by /u/{reddit_username})').format(
         platform='python',
-        app_id='telegram-eyebleach',
+        app_id='telegram-reddit-command',
         version='1',
         reddit_username='killarny',
     )
