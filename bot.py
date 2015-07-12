@@ -149,6 +149,7 @@ class TelegramBot(object):
     bot_id = None
     complain_about_invalid_commands = False
     command_not_supported_message = "That's not a valid command."
+    exiting = False
     last_update = 1
 
     def __init__(self):
@@ -219,16 +220,6 @@ def main(bot_class=TelegramBot):
     parser = ArgumentParser(description='An easily extensible Telegram bot.')
     args = parser.parse_args()
 
-    def was_force_stopped(signo, stackframe):
-        if signo == SIGINT:
-            print()
-            logger.warning('Bot interrupted via keypress!')
-        if signo == SIGTERM:
-            logger.warning('Bot was asked to shutdown..')
-        parser.exit()
-    signal(SIGINT, was_force_stopped)
-    signal(SIGTERM, was_force_stopped)
-
     # set up logging aparatus
     logging.captureWarnings(True)
     logging_config = dict(
@@ -243,9 +234,25 @@ def main(bot_class=TelegramBot):
 
     logger.info('Starting Telegram bot..')
     bot = bot_class()
+
+    # handle exit conditions gracefully
+    def was_force_stopped(signo, stackframe):
+        if signo == SIGINT:
+            print()
+            logger.debug('Bot interrupted via keypress!')
+        if signo == SIGTERM:
+            logger.debug('Bot was asked to shutdown..')
+        logger.info('Shutting down..')
+        bot.exiting = True
+    signal(SIGINT, was_force_stopped)
+    signal(SIGTERM, was_force_stopped)
+
     while True:
+        if bot.exiting:
+            break
         sleep(2)
         bot.get_updates()
+    parser.exit()
 
             
 if __name__ == '__main__':
