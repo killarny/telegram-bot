@@ -196,6 +196,7 @@ def main(bot_class=TelegramBot):
 
     def was_force_stopped(signo, stackframe):
         if signo == SIGINT:
+            print()
             logger.warning('Bot interrupted via keypress!')
         if signo == SIGTERM:
             logger.warning('Bot was asked to shutdown..')
