@@ -118,12 +118,11 @@ class Update(object):
                 command, self._cargs = args[0], []
         return self._cargs
 
-    def handle(self, bot_class):
+    def handle(self, bot):
         if not self.message.text:
             return
 
-        bot = bot_class()
-        commands = [x.strip('command_') for x in dir(bot) 
+        commands = [x.strip('command_') for x in dir(bot)
                     if x.startswith('command_')]
         if self.command not in commands:
             raise CommandNotSupported(self.command)
@@ -150,6 +149,7 @@ class TelegramBot(object):
     bot_id = None
     complain_about_invalid_commands = False
     command_not_supported_message = "That's not a valid command."
+    last_update = 1
 
     def __init__(self):
         if not self.bot_id:
@@ -158,6 +158,31 @@ class TelegramBot(object):
     @property
     def url(self):
         return self.base_url.format(bot_id=self.bot_id)
+
+    def get_updates(self):
+        response = requests.get('{}/getupdates'.format(self.url), params={
+            'offset': self.last_update+1,
+        })
+        if not response.status_code == 200:
+            logger.error('Bad status code: {}'.format(response.status_code))
+            return
+        if not response.json().get('ok'):
+            raise ValueError('Error: {error}'.format(
+                error=response.json().get('description',
+                                          'no error description.'),
+            ))
+        updates = [Update(u) for u in response.json().get('result', [])]
+        updates.sort(key=lambda x: x.id)
+        self.last_update = max([u.id for u in updates]) if updates else 0
+        for update in updates:
+            try:
+                update.handle(self)
+            except CommandNotSupported:
+                if not self.complain_about_invalid_commands:
+                    continue
+                self.send_message(update.message.chat.id,
+                                  self.command_not_supported_message.format(
+                                      command=update.command))
 
     def send_chat_action(self, to_id, action=None):
         if action not in ['typing', 'upload_photo', 'record_video',
@@ -217,33 +242,10 @@ def main(bot_class=TelegramBot):
     noise.disabled = True
 
     logger.info('Starting Telegram bot..')
-    last_update = 1
+    bot = bot_class()
     while True:
         sleep(2)
-        bot = bot_class()
-        response = requests.get('{}/getupdates'.format(bot.url), params={
-            'offset': last_update+1,
-        })
-        if not response.status_code == 200:
-            logger.error('Bad status code: {}'.format(response.status_code))
-            continue
-        if not response.json().get('ok'):
-            raise ValueError('Error: {error}'.format(
-                error=response.json().get('description', 
-                                          'no error description.'),
-            ))
-        updates = [Update(u) for u in response.json().get('result', [])]
-        updates.sort(key=lambda x: x.id)
-        last_update = max([u.id for u in updates]) if updates else 0
-        for update in updates:
-            try:
-                update.handle(bot_class)
-            except CommandNotSupported:
-                if not bot.complain_about_invalid_commands:
-                    continue
-                bot.send_message(update.message.chat.id, 
-                                 bot.command_not_supported_message.format(
-                                    command=update.command))
+        bot.get_updates()
 
             
 if __name__ == '__main__':
