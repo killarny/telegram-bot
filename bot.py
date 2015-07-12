@@ -1,8 +1,8 @@
 from datetime import datetime
-from random import choice, randrange
-import tempfile
+from random import choice
 from time import sleep
 import traceback
+
 from bs4 import BeautifulSoup
 import praw
 import requests
