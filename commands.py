@@ -1,7 +1,10 @@
+import logging
 from bs4 import BeautifulSoup
 from praw import Reddit
 from random import choice
 import requests
+
+logger = logging.getLogger('commands')
 
 
 def get_image_links_from_imgur(imgur_url):
@@ -68,7 +71,7 @@ class RedditCommand(object):
         # find all the image links in the submission, and choose a random one
         image_url = choice(get_image_links_from_imgur(submission))
         # get the image content
-        print('"/{command}" from {user}: posting image at {url}'.format(
+        logger.info('"/{command}" from {user}: posting image at {url}'.format(
             command=' '.join([update.command] + update.command_args),
             user=update.message.user.username,
             url=image_url,
@@ -121,7 +124,7 @@ class GetCommand(object):
                              'I can\'t find an image '
                              'for "{}"'.format(' '.join(search_terms)))
             return
-        print('"/{command}" from {user}: posting image at {url}'.format(
+        logger.info('"/{command}" from {user}: posting image at {url}'.format(
             command=' '.join([update.command] + update.command_args),
             user=update.message.user.username,
             url=image_url,

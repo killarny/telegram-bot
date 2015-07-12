@@ -1,9 +1,12 @@
 from datetime import datetime
+import logging
 from time import sleep
 import traceback
 import requests
 
-    
+logger = logging.getLogger('bot')
+
+
 class User(object):
     id = 0
     username = None
@@ -132,9 +135,9 @@ class Update(object):
                 return func(*self.command_args, bot=bot, update=self)
             return func(bot=bot, update=self)
         except Exception as e:
-            # print traceback for exceptions, but don't allow them to 
+            # log traceback for exceptions, but don't allow them to
             #  halt the bot
-            print(traceback.format_exc())
+            logger.exception(e)
             bot.send_message(self.message.chat.id, 
                              'There was an error with the /{command} '
                              'command. Sorry!'.format(command=self.command))
@@ -186,7 +189,19 @@ class TelegramBot(object):
 
 
 def main(bot_class=TelegramBot):
-    print('Starting Telegram bot..')
+    # set up logging aparatus
+    logging.captureWarnings(True)
+    logging_config = dict(
+        level=logging.DEBUG,
+        datefmt='%Y-%m-%d %H:%M:%S',
+        format='%(asctime)-15s %(name)s: %(levelname)s %(message)s',
+    )
+    logging.basicConfig(**logging_config)
+    # suppress logs from the requests library connection pool (they're noisy)
+    noise = logging.getLogger('requests.packages.urllib3.connectionpool')
+    noise.disabled = True
+
+    logger.info('Starting Telegram bot..')
     last_update = 1
     while True:
         sleep(2)
@@ -195,7 +210,7 @@ def main(bot_class=TelegramBot):
             'offset': last_update+1,
         })
         if not response.status_code == 200:
-            print('Bad status code: {}'.format(response.status_code))
+            logger.error('Bad status code: {}'.format(response.status_code))
             continue
         if not response.json().get('ok'):
             raise ValueError('Error: {error}'.format(
