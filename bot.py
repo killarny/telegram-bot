@@ -166,8 +166,8 @@ class Update(object):
         
         try:
             if self.command_args:
-                return func(*self.command_args, update=self)
-            return func(update=self)
+                return func(*self.command_args, bot=bot, update=self)
+            return func(bot=bot, update=self)
         except Exception as e:
             # print traceback for exceptions, but don't allow them to 
             #  halt the bot
@@ -218,45 +218,62 @@ class TelegramBot(object):
             params.update({
                 'reply_to_message_id': reply_to_message_id,
             })
-        response = requests.post('{}/sendphoto'.format(self.url), 
+        response = requests.post('{}/sendphoto'.format(self.url),
                                  params=params, files=files)
-        
-    def command_eyebleach(self, caption=None, update=None,
-                           subreddits=['stacked', 'tightdresses']):
+
+
+class RedditCommand(object):
+    """
+    /reddit
+
+    Provides a command that pulls a random top image from one of the allowed
+    subreddits.
+    """
+    error_message = "I can't find a suitable image. Try again later!"
+    subreddits = ['aww']
+
+    def _cmd_reddit(self, caption=None, bot=None, update=None):
         """
-        Find and send a random image from a random subreddit containing 
-        "eyebleach" images.
+        Find and send a random image from a random subreddit containing
+        images.
         """
-        if not update:
+        if not (bot and update):
             return
-        self.send_chat_action(update.message.chat.id)
+        bot.send_chat_action(update.message.chat.id)
         # choose a random subreddit to pull image from
-        subreddit = choice(subreddits)
+        subreddit = choice(self.subreddits)
         # grab submissions from the subreddit
         reddit = praw.Reddit(user_agent=reddit_user_agent)
         submissions = reddit.get_subreddit(subreddit).get_hot(limit=50)
         # skip non-imgur links, animated images, and choose a random submission
-        submission = choice([sub.url for sub in submissions 
+        submission = choice([sub.url for sub in submissions
                              if 'imgur.com' in sub.url])
         # find all the image links in the submission, and choose a random one
         image_url = choice(get_image_links_from_imgur(submission))
         # get the image content
         response = requests.get(image_url)
         if response.status_code != 200:
-            self.send_message(update.message.chat.id,
-                              'I can\'t find a suitable eyebleach image. '
-                              'Try again later!',
-            )
+            bot.send_message(update.message.chat.id, self.error_message)
             return
         image_content = response.content
-        self.send_photo(update.message.chat.id, image_content,
-                        reply_to_message_id=update.message.id,
-                        caption=image_url)
+        bot.send_photo(update.message.chat.id, image_content,
+                       reply_to_message_id=update.message.id,
+                       caption=image_url)
+    # allow subclasses to change the command
+    command_reddit = _cmd_reddit
 
-    def command_get(self, *search_terms, caption=None, update=None):
-        if not search_terms or not update:
+
+class GetCommand(object):
+    """
+    /get <search terms>
+
+    Provides a command that searches for a random image on google matching
+    a search term.
+    """
+    def _cmd_get(self, *search_terms, caption=None, bot=None, update=None):
+        if not (search_terms and bot and update):
             return
-        self.send_chat_action(update.message.chat.id)
+        bot.send_chat_action(update.message.chat.id)
         url = 'https://ajax.googleapis.com/ajax/services/search/images'
         response = requests.get(url, params={
             'q': '+'.join(search_terms),
@@ -278,15 +295,16 @@ class TelegramBot(object):
             else:
                 image_url = result.get('unescapedUrl')
         if not image_url:
-            self.send_message(update.message.chat.id,
-                              'I can\'t find an image '
-                              'for "{}"'.format(' '.join(search_terms)))
+            bot.send_message(update.message.chat.id,
+                             'I can\'t find an image '
+                             'for "{}"'.format(' '.join(search_terms)))
             return
         image_content = requests.get(image_url).content
-        self.send_photo(update.message.chat.id, image_content, 
-                        reply_to_message_id=update.message.id,
-                        caption=image_url,
-        )
+        bot.send_photo(update.message.chat.id, image_content,
+                       reply_to_message_id=update.message.id,
+                       caption=image_url)
+    # allow subclasses to change the command
+    command_get = _cmd_get
 
 
 def main(bot_class=TelegramBot):
