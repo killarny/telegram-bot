@@ -4,7 +4,6 @@ import logging
 from signal import SIGINT, signal
 from signal import SIGTERM
 from time import sleep
-import traceback
 import requests
 
 logger = logging.getLogger('bot')
