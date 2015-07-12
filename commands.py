@@ -68,6 +68,11 @@ class RedditCommand(object):
         # find all the image links in the submission, and choose a random one
         image_url = choice(get_image_links_from_imgur(submission))
         # get the image content
+        print('"/{command}" from {user}: posting image at {url}'.format(
+            command=' '.join([update.command] + update.command_args),
+            user=update.message.user.username,
+            url=image_url,
+        ))
         response = requests.get(image_url)
         if response.status_code != 200:
             bot.send_message(update.message.chat.id, self.error_message)
@@ -116,6 +121,11 @@ class GetCommand(object):
                              'I can\'t find an image '
                              'for "{}"'.format(' '.join(search_terms)))
             return
+        print('"/{command}" from {user}: posting image at {url}'.format(
+            command=' '.join([update.command] + update.command_args),
+            user=update.message.user.username,
+            url=image_url,
+        ))
         image_content = requests.get(image_url).content
         bot.send_photo(update.message.chat.id, image_content,
                        reply_to_message_id=update.message.id,
