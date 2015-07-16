@@ -27,7 +27,10 @@ def get_image_links_from_imgur(imgur_url):
         urls.append(imgur_url)
     # single-image page
     else:
-        urls.append(soup.select('.image a')[0]['href'])
+        try:
+            urls.append(soup.select('.image a')[0]['href'])
+        except IndexError:
+            pass
     # clean up image URLs
     urls = [url.strip('/') for url in urls]
     urls = ['http://{}'.format(url) if not url.startswith('http') else url
@@ -69,7 +72,11 @@ class RedditCommand(object):
         submission = choice([sub.url for sub in submissions
                              if 'imgur.com' in sub.url])
         # find all the image links in the submission, and choose a random one
-        image_url = choice(get_image_links_from_imgur(submission))
+        try:
+            image_url = choice(get_image_links_from_imgur(submission))
+        except (IndexError, ValueError):
+            # no image found, so try again
+            return self._cmd_reddit(caption=caption, bot=bot, update=update)
         # get the image content
         logger.info('"/{command}" from {user}: posting image at {url}'.format(
             command=' '.join([update.command] + update.command_args),
