@@ -6,6 +6,7 @@ from signal import SIGINT, signal
 from signal import SIGTERM
 from time import sleep
 import requests
+from commands import GetCommand
 
 logger = logging.getLogger('bot')
 
@@ -221,7 +222,11 @@ class TelegramBot(object):
                                  params=params, files=files)
 
 
-def main(bot_class=TelegramBot):
+class DemoTelegramBot(TelegramBot, GetCommand):
+    pass
+
+
+def main(bot_class=DemoTelegramBot):
     parser = ArgumentParser(description='An easily extensible Telegram bot.')
     parser.add_argument('--bot-id', default=environ.get('TELEGRAM_BOT_ID'),
                         help='can also be set via an environment variable '
