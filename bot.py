@@ -224,7 +224,7 @@ def main(bot_class=TelegramBot):
     parser = ArgumentParser(description='An easily extensible Telegram bot.')
     args = parser.parse_args()
 
-    # set up logging aparatus
+    # set up logging apparatus
     logging.captureWarnings(True)
     logging_config = dict(
         level=logging.DEBUG,
