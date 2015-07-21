@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from datetime import datetime
 import logging
+from os import environ
 from signal import SIGINT, signal
 from signal import SIGTERM
 from time import sleep
@@ -146,15 +147,15 @@ class Update(object):
 
 class TelegramBot(object):
     base_url = 'https://api.telegram.org/bot{bot_id}'
-    bot_id = None
     complain_about_invalid_commands = False
     command_not_supported_message = "That's not a valid command."
     exiting = False
     last_update = 1
 
-    def __init__(self):
-        if not self.bot_id:
+    def __init__(self, bot_id):
+        if not bot_id:
             raise RuntimeError('No bot_id supplied.')
+        self.bot_id = bot_id
 
     @property
     def url(self):
@@ -222,6 +223,9 @@ class TelegramBot(object):
 
 def main(bot_class=TelegramBot):
     parser = ArgumentParser(description='An easily extensible Telegram bot.')
+    parser.add_argument('--bot-id', default=environ.get('TELEGRAM_BOT_ID'),
+                        help='can also be set via an environment variable '
+                             'called TELEGRAM_BOT_ID')
     args = parser.parse_args()
 
     # set up logging apparatus
@@ -237,7 +241,7 @@ def main(bot_class=TelegramBot):
     noise.disabled = True
 
     logger.info('Starting Telegram bot..')
-    bot = bot_class()
+    bot = bot_class(args.bot_id)
 
     # handle exit conditions gracefully
     def was_force_stopped(signo, stackframe):
