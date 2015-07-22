@@ -168,13 +168,17 @@ class TelegramBot(object):
         return self.base_url.format(bot_id=self.bot_id)
 
     def get_updates(self):
+        update_url = '{}/getupdates'.format(self.url)
+        logger.debug('GET {}'.format(update_url))
         try:
-            response = requests.get('{}/getupdates'.format(self.url), params={
+            response = requests.get(update_url, params={
                 'offset': self.last_update+1,
             })
         except requests.ConnectionError as e:
             logger.error(str(e))
             return
+        else:
+            logger.debug(response.text)
         if not response.status_code == 200:
             logger.error('Bad status code: {}'.format(response.status_code))
             return
