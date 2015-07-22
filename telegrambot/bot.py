@@ -1,12 +1,17 @@
 from argparse import ArgumentParser
 from datetime import datetime
 import logging
-from os import environ
 from signal import SIGINT, signal
 from signal import SIGTERM
 from time import sleep
+
+from os import environ
 import requests
-from commands import GetCommand
+
+from .commands import GetCommand
+
+__all__ = ['TelegramBot', 'main']
+
 
 logger = logging.getLogger('bot')
 
