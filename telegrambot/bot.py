@@ -236,12 +236,14 @@ def main(bot_class=DemoTelegramBot):
     parser.add_argument('--bot-id', default=environ.get('TELEGRAM_BOT_ID'),
                         help='can also be set via an environment variable '
                              'called TELEGRAM_BOT_ID')
+    parser.add_argument('-v', dest='verbose', action='store_true',
+                        help='verbose logging')
     args = parser.parse_args()
 
     # set up logging apparatus
     logging.captureWarnings(True)
     logging_config = dict(
-        level=logging.DEBUG,
+        level=logging.DEBUG if args.verbose else logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S',
         format='%(asctime)-15s %(name)s: %(levelname)s %(message)s',
     )
