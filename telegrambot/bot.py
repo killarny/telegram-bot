@@ -231,11 +231,7 @@ class TelegramBot(object):
                                  params=params, files=files)
 
 
-class DemoTelegramBot(TelegramBot, GetCommand):
-    pass
-
-
-def main(bot_class=DemoTelegramBot):
+def main(bot_class=TelegramBot):
     parser = ArgumentParser(description='An easily extensible Telegram bot.')
     parser.add_argument('--bot-id', default=environ.get('TELEGRAM_BOT_ID'),
                         help='can also be set via an environment variable '
@@ -277,7 +273,3 @@ def main(bot_class=DemoTelegramBot):
         sleep(2)
         bot.get_updates()
     parser.exit()
-
-            
-if __name__ == '__main__':
-    main()
