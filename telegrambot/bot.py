@@ -82,7 +82,15 @@ class Message(object):
 		)
 
 
-class CommandNotSupported(Exception):
+class TelegramBotException(Exception):
+    pass
+
+
+class CommandNotSupported(TelegramBotException):
+    pass
+
+
+class InvalidCommandClass(TelegramBotException):
     pass
 
 
@@ -129,19 +137,15 @@ class Update(object):
         if not self.message.text:
             return
 
-        commands = [x.strip('command_') for x in dir(bot)
-                    if x.startswith('command_')]
-        if self.command not in commands:
-            raise CommandNotSupported(self.command)
-
-        func = getattr(bot, 'command_{}'.format(self.command))
-        if not func:
+        try:
+            cls, method = bot.command_map.get(self.command)
+        except KeyError:
             raise CommandNotSupported(self.command)
         
         try:
             if self.command_args:
-                return func(*self.command_args, bot=bot, update=self)
-            return func(bot=bot, update=self)
+                return method(*self.command_args, bot=bot, update=self)
+            return method(bot=bot, update=self)
         except Exception as e:
             # log traceback for exceptions, but don't allow them to
             #  halt the bot
@@ -157,11 +161,36 @@ class TelegramBot(object):
     command_not_supported_message = "That's not a valid command."
     exiting = False
     last_update = 1
+    commands = []
 
     def __init__(self, bot_id):
         if not bot_id:
             raise RuntimeError('No bot_id supplied.')
         self.bot_id = bot_id
+        self.command_map = self.construct_command_map()
+
+    def construct_command_map(self):
+        command_map = {}
+        for cls in self.commands:
+            try:
+                for command, method in cls().command_map.items():
+                    if command in command_map:
+                        cmdcls, cmdmethod = command_map.get(command)
+                        logger.warning('"/{cmd}" already provided by {cmdcls}! '
+                                       'Ignoring redefinition by '
+                                       '{igcls}.'.format(
+                            cmd=command,
+                            cmdcls=cmdcls.__name__,
+                            igcls=cls.__name__,
+                        ))
+                        continue
+                    command_map.update({command: (cls, method)})
+            except AttributeError as e:
+                if 'command_map' in str(e):
+                    raise InvalidCommandClass(
+                        '{}.command_map dict is missing.'.format(cls.__name__))
+                raise
+        return command_map
 
     @property
     def url(self):
@@ -253,7 +282,11 @@ def main(bot_class=TelegramBot):
     noise.disabled = True
 
     logger.info('Starting Telegram bot..')
-    bot = bot_class(args.bot_id)
+    try:
+        bot = bot_class(args.bot_id)
+    except TelegramBotException as e:
+        logger.error(e)
+        parser.exit(1)
 
     # handle exit conditions gracefully
     def was_force_stopped(signo, stackframe):

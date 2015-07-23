@@ -55,7 +55,12 @@ class RedditCommand(object):
     )
     subreddits = ['aww']
 
-    def _cmd_reddit(self, caption=None, bot=None, update=None):
+    def __init__(self):
+        self.command_map = {
+            'reddit': self.random_reddit_image,
+        }
+
+    def random_reddit_image(self, caption=None, bot=None, update=None):
         """
         Find and send a random image from a random subreddit containing
         images.
@@ -91,8 +96,6 @@ class RedditCommand(object):
         bot.send_photo(update.message.chat.id, image_content,
                        reply_to_message_id=update.message.id,
                        caption=image_url)
-    # allow subclasses to change the command
-    command_reddit = _cmd_reddit
 
 
 class GetCommand(object):
@@ -102,7 +105,12 @@ class GetCommand(object):
     Provides a command that searches for a random image on google matching
     a search term.
     """
-    def _cmd_get(self, *search_terms, caption=None, bot=None, update=None):
+    def __init__(self):
+        self.command_map = {
+            'get': self.search,
+        }
+
+    def search(self, *search_terms, caption=None, bot=None, update=None):
         if not (search_terms and bot and update):
             return
         bot.send_chat_action(update.message.chat.id)
@@ -140,5 +148,3 @@ class GetCommand(object):
         bot.send_photo(update.message.chat.id, image_content,
                        reply_to_message_id=update.message.id,
                        caption=image_url)
-    # allow subclasses to change the command
-    command_get = _cmd_get
