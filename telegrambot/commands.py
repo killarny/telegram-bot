@@ -81,7 +81,8 @@ class RedditCommand(object):
             image_url = choice(get_image_links_from_imgur(submission))
         except (IndexError, ValueError):
             # no image found, so try again
-            return self._cmd_reddit(caption=caption, bot=bot, update=update)
+            return self.random_reddit_image(caption=caption, bot=bot,
+                                            update=update)
         # get the image content
         logger.info('"/{command}" from {user}: posting image at {url}'.format(
             command=' '.join([update.command] + update.command_args),
