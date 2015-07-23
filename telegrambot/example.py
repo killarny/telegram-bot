@@ -2,8 +2,8 @@ from telegrambot import TelegramBot, main
 from telegrambot.commands import GetCommand
 
 
-class DemoTelegramBot(TelegramBot, GetCommand):
-    pass
+class DemoTelegramBot(TelegramBot):
+    commands = [GetCommand]
 
 
 if __name__ == '__main__':
