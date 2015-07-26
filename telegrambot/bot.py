@@ -139,7 +139,7 @@ class Update(object):
 
         try:
             cls, method = bot.command_map.get(self.command)
-        except KeyError:
+        except (KeyError, TypeError):
             raise CommandNotSupported(self.command)
         
         try:
