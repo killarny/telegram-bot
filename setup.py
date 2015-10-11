@@ -7,7 +7,7 @@ setup(
     install_requires = [
         'beautifulsoup4==4.4.0',
         'html5lib==0.999999',
-        'praw==3.1.0',
+        'praw==3.3.0',
         'requests==2.7.0',
     ],
     author = "killarny",
