@@ -1,4 +1,4 @@
-from io import StringIO
+from io import BytesIO
 import logging
 from bs4 import BeautifulSoup
 from PIL import Image
@@ -44,7 +44,7 @@ def make_thumbnail(image_content):
     """
     Create a thumbnail version of the image_content, and return it.
     """
-    image = Image(StringIO(image_content))
+    image = Image(BytesIO(image_content))
     thumb = image.thumbnail((250, 250))
     return thumb.tobytes()
 
