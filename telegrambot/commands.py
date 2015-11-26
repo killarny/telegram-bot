@@ -104,7 +104,8 @@ class RedditCommand(object):
         if response.status_code != 200:
             bot.send_message(update.message.chat.id, self.error_message)
             return
-        image_content = make_thumbnail(response.content)
+        # image_content = make_thumbnail(response.content)
+        image_content = response.content
         bot.send_photo(update.message.chat.id, image_content,
                        reply_to_message_id=update.message.id,
                        caption=image_url)
