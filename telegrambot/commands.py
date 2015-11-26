@@ -45,8 +45,8 @@ def make_thumbnail(image_content):
     Create a thumbnail version of the image_content, and return it.
     """
     image = Image.open(BytesIO(image_content))
-    thumb = image.thumbnail((250, 250))
-    return thumb.tobytes()
+    image.thumbnail((250, 250))
+    return image.tobytes()
 
 
 class RedditCommand(object):
