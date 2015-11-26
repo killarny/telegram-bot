@@ -9,6 +9,7 @@ setup(
         'html5lib==0.999999',
         'praw==3.3.0',
         'requests==2.7.0',
+        'Pillow==3.0.0',
     ],
     author = "killarny",
     author_email = "killarny@gmail.com",

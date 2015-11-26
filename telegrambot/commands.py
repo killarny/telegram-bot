@@ -1,5 +1,7 @@
+from io import StringIO
 import logging
 from bs4 import BeautifulSoup
+from PIL import Image
 from praw import Reddit
 from random import choice
 import requests
@@ -36,6 +38,15 @@ def get_image_links_from_imgur(imgur_url):
     urls = ['http://{}'.format(url) if not url.startswith('http') else url
             for url in urls]
     return urls
+
+    
+def make_thumbnail(image_content):
+    """
+    Create a thumbnail version of the image_content, and return it.
+    """
+    image = Image(StringIO(image_content))
+    thumb = image.thumbnail((250, 250))
+    return thumb.tobytes()
 
 
 class RedditCommand(object):
@@ -93,7 +104,7 @@ class RedditCommand(object):
         if response.status_code != 200:
             bot.send_message(update.message.chat.id, self.error_message)
             return
-        image_content = response.content
+        image_content = make_thumbnail(response.content)
         bot.send_photo(update.message.chat.id, image_content,
                        reply_to_message_id=update.message.id,
                        caption=image_url)
