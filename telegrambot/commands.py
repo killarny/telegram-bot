@@ -123,19 +123,20 @@ class GetCommand(object):
         self.command_map = {
             'get': self.search,
         }
+        self.api_key = environ.get('GOOGLE_SEARCH_API_KEY', None)
+        if not self.api_key:
+            logger.critical('No Google Search API key specified! Set the '
+                            'GOOGLE_SEARCH_API_KEY environment variable.')
+            logger.warning('{classname} will not be available until an '
+                           'API key is provided.'.format(
+                classname=self.__class__.__name__,
+            ))
+            return
 
     def search(self, *search_terms, caption=None, bot=None, update=None):
         if not (search_terms and bot and update):
             return
         bot.send_chat_action(update.message.chat.id)
-        api_key = environ.get('GOOGLE_SEARCH_API_KEY', None)
-        if not api_key:
-            logger.critical('No Google Search API key specified! Set the '
-                            'GOOGLE_SEARCH_API_KEY environment variable.')
-            bot.send_message(update.message.chat.id,
-                             'I can\'t find an image for "{}" '
-                             '(no api key)'.format(' '.join(search_terms)))
-            return
         url = 'https://ajax.googleapis.com/ajax/services/search/images'
         response = requests.get(url, params={
             'q': '+'.join(search_terms),
