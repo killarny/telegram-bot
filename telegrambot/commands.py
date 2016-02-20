@@ -148,31 +148,35 @@ class GetCommand(object):
         if not (search_terms and bot and update):
             return
         bot.send_chat_action(update.message.chat.id)
-        url = 'https://ajax.googleapis.com/ajax/services/search/images'
-        response = requests.get(url, params={
+        url = 'https://www.googleapis.com/customsearch/v1'
+        payload = {
+            'cx': self.cse_id,
+            'key': self.api_key,
             'q': '+'.join(search_terms),
-            'v': '1.0',
-            'imgsz': 'medium',
-            'imgtype': 'photo',
-            'as_filetype': 'png',
-            'start': 0,
+            'searchType': 'image',
+            'imgSize': 'medium',
+            'imgType': 'photo',
+            'fileType': 'png',
+            'start': 1,
             'num': 10,
             'safe': 'off',
-        }).json()
+        }
+        payload_str = "&".join("%s=%s" % (k,v) for k,v in payload.items())
+        response = requests.get(url, payload_str)
+        response_json = response.json()
         image_url = None
-        response_status = response.get('responseStatus', '???')
-        response_data = response.get('responseData', 'no response data')
+        response_status = response.status_code
         if response_status == 200:
             try:
-                result = choice(response_data.get('results', []))
+                result = choice(response_json.get('items', []))
             except IndexError:
                 image_url = None
             else:
-                image_url = result.get('unescapedUrl')
+                image_url = result.get('link')
         else:
-            logger.error('{status}: {data}'.format(
-                status=response_status,
-                data=response_data,
+            logger.error('{status}: {reason}'.format(
+                status=response.status_code,
+                reason=response.reason,
             ))
         if not image_url:
             bot.send_message(update.message.chat.id,
