@@ -139,14 +139,20 @@ class GetCommand(object):
             'safe': 'off',
         }).json()
         image_url = None
-        if response.get('responseStatus') == 200:
-            response_data = response.get('responseData')
+        response_status = response.get('responseStatus', '???')
+        response_data = response.get('responseData', 'no response data')
+        if response_status == 200:
             try:
                 result = choice(response_data.get('results', []))
             except IndexError:
                 image_url = None
             else:
                 image_url = result.get('unescapedUrl')
+        else:
+            logger.error('{status}: {data}'.format(
+                status=response_status,
+                data=response_data,
+            ))
         if not image_url:
             bot.send_message(update.message.chat.id,
                              'I can\'t find an image '
