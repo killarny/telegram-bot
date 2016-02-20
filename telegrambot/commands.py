@@ -123,7 +123,18 @@ class GetCommand(object):
         self.command_map = {
             'get': self.search,
         }
-        self.api_key = environ.get('GOOGLE_SEARCH_API_KEY', None)
+        # Google CSE ID required: https://cse.google.com/
+        self.cse_id = environ.get('GOOGLE_CSE_ID', None)
+        if not self.cse_id:
+            logger.critical('No Google CSE ID specified! Set the '
+                            'GOOGLE_CSE_ID environment variable.')
+            logger.warning('{classname} will not be available until a '
+                           'CSE ID is provided.'.format(
+                classname=self.__class__.__name__,
+            ))
+            return
+        # Google Search API key required: https://console.developers.google.com/apis/api/customsearch
+        self.api_key = environ.get('GOOGLE_API_KEY', None)
         if not self.api_key:
             logger.critical('No Google Search API key specified! Set the '
                             'GOOGLE_SEARCH_API_KEY environment variable.')
