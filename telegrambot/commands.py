@@ -1,5 +1,6 @@
 from io import BytesIO
 import logging
+from os import environ
 from bs4 import BeautifulSoup
 from PIL import Image
 from praw import Reddit
@@ -127,6 +128,14 @@ class GetCommand(object):
         if not (search_terms and bot and update):
             return
         bot.send_chat_action(update.message.chat.id)
+        api_key = environ.get('GOOGLE_SEARCH_API_KEY', None)
+        if not api_key:
+            logger.critical('No Google Search API key specified! Set the '
+                            'GOOGLE_SEARCH_API_KEY environment variable.')
+            bot.send_message(update.message.chat.id,
+                             'I can\'t find an image for "{}" '
+                             '(no api key)'.format(' '.join(search_terms)))
+            return
         url = 'https://ajax.googleapis.com/ajax/services/search/images'
         response = requests.get(url, params={
             'q': '+'.join(search_terms),
